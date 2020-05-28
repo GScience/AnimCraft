@@ -19,7 +19,7 @@ pattle_t* getCanvasPattle(canvas_t* canvas);
 void genCommandChan(canvas_t* canvas, const char* path);
 
 void setFrameData(frame_t* frame, int x, int y, int pattle_id);
-void convertFrameToMCFunction(frame_t* frame, const char* path);
+void convertFrameToMCFunction(frame_t* frame, frame_t* previous_frame, const char* path);
 pattle_t* getFramePattle(frame_t* frame);
 
 void bindPattleColor(pattle_t* pattle, int color, const char* block_id);

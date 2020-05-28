@@ -54,7 +54,7 @@ void convertCnavasToMCFunction(canvas_t* canvas, const char* path)
 	for (size_t i = 0; i < canvas->frame_count; ++i)
 	{
 		sprintf(_buffer, "%s/frame-%d.mcfunction", path, i);
-		convertFrameToMCFunction(canvas->frames[i], _buffer);
+		convertFrameToMCFunction(canvas->frames[i], i > 1 ? canvas->frames[i - 1] : 0, _buffer);
 	}
 }
 
@@ -195,7 +195,7 @@ void addFrame(canvas_t* canvas, frame_t* frame)
 	canvas->frames[canvas->frame_count - 1] = frame;
 }
 
-void convertFrameToMCFunction(frame_t* frame, const char* path)
+void convertFrameToMCFunction(frame_t* frame, frame_t* previous_frame, const char* path)
 {
 	FILE* file = fopen(path, "w");
 
@@ -206,6 +206,8 @@ void convertFrameToMCFunction(frame_t* frame, const char* path)
 	{
 		for (int y = 0; y < canvas->height; ++y)
 		{
+			if (previous_frame != 0 && previous_frame->data[x][y] == frame->data[x][y])
+				continue;
 			const char* blockId = getPattleBlockId(pattle, frame->data[x][y]);
 			fprintf(file, "setblock ~%d ~%d ~%d %s\n", x - canvas->width / 2, y - canvas->height / 2, 50, blockId);
 		}
@@ -255,9 +257,9 @@ void genCommandChan(canvas_t* canvas, const char* path)
 		int deltaX = nextX - x;
 		int deltaZ = nextZ - z;
 
-		fprintf(file, "setblock ~%d ~ ~%d minecraft:command_block[facing=up]{Command:\"setblock ~%d ~-1 ~%d minecraft:redstone_block\"}\n", x, z, deltaX, deltaZ, i);
+		fprintf(file, "setblock ~%d ~ ~%d minecraft:command_block[facing=up]{Command:\"setblock ~%d ~-1 ~%d minecraft:redstone_block\"}\n", x, z, deltaX, deltaZ);
 		fprintf(file, "setblock ~%d ~1 ~%d minecraft:chain_command_block[facing=up]{Command:\"execute at @p run function custom:anim/frame-%d\", auto:1}\n", x, z, i);
-		fprintf(file, "setblock ~%d ~2 ~%d minecraft:chain_command_block[facing=up]{Command:\"setblock ~ ~-3 ~ minecraft:air\", auto:1}\n", x, z, i);
+		fprintf(file, "setblock ~%d ~2 ~%d minecraft:chain_command_block[facing=up]{Command:\"setblock ~ ~-3 ~ minecraft:air\", auto:1}\n", x, z);
 
 		z = nextZ;
 		x = nextX;
